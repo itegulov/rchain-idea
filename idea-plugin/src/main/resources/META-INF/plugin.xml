@@ -1,0 +1,33 @@
+<idea-plugin>
+    <id>coop.rchain.idea</id>
+    <name>RChain Support</name>
+    <version>0.1.0</version>
+    <vendor url="https://rchain.coop">RChain</vendor>
+
+    <description><![CDATA[
+      Support for custom macros defined in RChain codebase.
+    ]]></description>
+
+    <change-notes><![CDATA[
+    ]]>
+    </change-notes>
+
+    <idea-version since-build="182.0"/>
+
+    <depends>org.intellij.scala</depends>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="org.intellij.scala">
+        <syntheticMemberInjector implementation="coop.rchain.idea.GenerateSafeInjection"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+
+</idea-plugin>

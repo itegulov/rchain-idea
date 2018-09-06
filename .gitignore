@@ -1,0 +1,7 @@
+target
+*.class
+*.jar
+project/target
+project/project
+*/target
+.idea
