@@ -14,7 +14,7 @@ class GenerateSafeInjection extends SyntheticMembersInjector {
   private val logger = Logger.getInstance(classOf[GenerateSafeInjection])
 
   private def convertToSafeTpe(tpe: ScType): Option[String] =
-    tpe.extractClass.map(_.getName).map(name => tpe.canonicalText + "." + name + "Safe")
+    tpe.extractClass.map(_.getName).map(name => tpe.canonicalText + ".Safe")
 
   override def injectInners(source: ScTypeDefinition): Seq[String] =
     source match {
@@ -22,7 +22,6 @@ class GenerateSafeInjection extends SyntheticMembersInjector {
         ScalaPsiUtil.getCompanionModule(obj) match {
           case Some(clazz: ScClass)
               if clazz.findAnnotationNoAliases("coop.rchain.models.macros.GenerateSafe") != null =>
-            val safeClassName = clazz.name + "Safe"
             val safeParamsAndMethods = clazz.parameters.map { parameter =>
               parameter.`type`() match {
                 case Right(ScParameterizedType(des, Seq(tpe)))
@@ -30,14 +29,14 @@ class GenerateSafeInjection extends SyntheticMembersInjector {
                   convertToSafeTpe(tpe).map { safeTpe =>
                     (
                       parameter.name + ": " + safeTpe,
-                      s"def with${parameter.name.capitalize}(v: $safeTpe): $safeClassName = ???"
+                      s"def with${parameter.name.capitalize}(v: $safeTpe): Safe = ???"
                     )
                   }
                 case Right(tpe) =>
                   Some(
                     (
                       parameter.name + ": " + tpe.canonicalText,
-                      s"def with${parameter.name.capitalize}(v: ${tpe.canonicalText}): $safeClassName = ???"
+                      s"def with${parameter.name.capitalize}(v: ${tpe.canonicalText}): Safe = ???"
                     )
                   )
                 case Left(_) =>
@@ -49,14 +48,14 @@ class GenerateSafeInjection extends SyntheticMembersInjector {
               val generatedParams           = safeParams :+ s"underlying: ${clazz.name}"
               logger.info(s"Class ${clazz.name} has safe params: ${generatedParams.mkString(", ")}")
               Seq(
-                s"""final case class $safeClassName (${generatedParams.mkString(", ")}) {
+                s"""final case class Safe (${generatedParams.mkString(", ")}) {
                    |  def toByteString: com.google.protobuf.ByteString = ???
                    |  def toByteArray: Array[Byte] = ???
                    |  ${withMethods.mkString("\n")}
                    |}
                  """.stripMargin,
-                s"""object $safeClassName {
-                   |  def create(underlying: ${clazz.name}): Option[$safeClassName] = ???
+                s"""object Safe {
+                   |  def create(underlying: ${clazz.name}): Option[Safe] = ???
                    |}
                  """.stripMargin
               )
